@@ -1,0 +1,29 @@
+// Tailscale ACL policy for this demo tailnet.
+// Paste this into the ACL editor at https://login.tailscale.com/admin/acls
+//
+// Access pattern:
+//   - devices tagged tag:client may reach devices tagged tag:server, but
+//     ONLY on tcp port 80.
+//   - tag:server devices cannot initiate connections to tag:client devices.
+//   - nothing else is allowed by default (Tailscale ACLs are default-deny).
+//
+// This models a real customer scenario: a small group of client machines
+// (e.g. developer laptops, CI runners) need access to one internal service,
+// and nothing else on the tailnet should be able to reach it.
+{
+  "tagOwners": {
+    "tag:server": ["autogroup:admin"],
+    "tag:client": ["autogroup:admin"],
+  },
+
+  "acls": [
+    {
+      "action": "accept",
+      "src":    ["tag:client"],
+      "dst":    ["tag:server:80"],
+    },
+  ],
+
+  // Enables MagicDNS-friendly, human-readable device names in `tailscale status`
+  "ssh": [],
+}

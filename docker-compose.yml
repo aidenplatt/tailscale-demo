@@ -1,0 +1,63 @@
+version: "3.8"
+
+# ---------------------------------------------------------------------------
+# Tailscale Solutions Engineer Take-Home
+#
+# Use case: expose a private web service on the tailnet and restrict access
+# to it using tags + an ACL policy, instead of exposing any port to the
+# public internet.
+#
+# Two nodes:
+#   - "web"    : an nginx service, only reachable over Tailscale (tag:server)
+#   - "client" : your own laptop, tagged tag:client in the Tailscale admin
+#                console, used to prove/validate connectivity - NOT a
+#                container in this setup
+#
+# The web container publishes no ports to the host. The ONLY way to reach
+# it is through the tailnet, from a device (like your laptop) permitted by
+# the ACL policy in policy.hujson.
+# ---------------------------------------------------------------------------
+
+services:
+  web:
+    image: nginx:alpine
+    container_name: ts-web
+    hostname: web
+    volumes:
+      - ./web-content:/usr/share/nginx/html:ro
+    networks:
+      - internal
+    # no "ports:" mapping on purpose - not reachable from the host/public net
+
+  web-tailscale:
+    image: tailscale/tailscale:latest
+    container_name: ts-web-sidecar
+    hostname: web
+    environment:
+      - TS_AUTHKEY=${TS_AUTHKEY_SERVER}
+      - TS_EXTRA_ARGS=--advertise-tags=tag:server --hostname=web
+      - TS_STATE_DIR=/var/lib/tailscale
+      - TS_USERSPACE=false
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    volumes:
+      - ts-web-state:/var/lib/tailscale
+    network_mode: service:web
+    depends_on:
+      - web
+
+networks:
+  internal:
+    driver: bridge
+
+volumes:
+  ts-web-state:
+
+# NOTE: the "client" node in this setup is your laptop itself, not a
+# container. Tag your laptop as tag:client in the Tailscale admin console
+# (Machines -> your laptop -> "..." -> Edit tags), and run validation
+# commands (tailscale status, curl) directly in your Mac's Terminal instead
+# of via `docker exec`. See scripts/validate.sh and the README for details.
