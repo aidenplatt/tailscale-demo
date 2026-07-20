@@ -83,7 +83,7 @@ namespace, and nginx serves the page back over the same encrypted tunnel.
 #### Steps
 
 ```bash
-git clone <this-repo-url>
+git clone https://github.com/aidenplatt/tailscale-demo.git
 cd tailscale-demo
 
 # Apply policy.hujson at https://login.tailscale.com/admin/acls
