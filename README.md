@@ -56,8 +56,8 @@ the ACL policy itself.
               |  Tailscale app  |  |  tailscaled sidecar |
               |                 |  |  (Docker Compose)   |
               |                 |  |  network_mode:      |
-              |                 |  |  service:web)       |
-              +-----------------+  +--------------------+
+              |                 |  |  service:web        |
+              +-----------------+  +---------------------+
   ACL policy (policy.hujson) using the current "grants" syntax:
     tag:client -> tag:server, port 80   [ALLOW]
     everything else                    [DENY - default]
@@ -173,3 +173,5 @@ learning Tailscale concepts (tailnets, MagicDNS, ACL syntax etc..).
 Claude also assisted me with coding the project and debugging the errors as they
 came up — including the hostname/network_mode conflict, the stuck Tailscale
 connection on my laptop and the Docker Desktop networking issue. 
+
+All in all, I enjoyed putting this assignment together and learning more about Tailscale! :)
